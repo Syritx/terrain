@@ -7,34 +7,16 @@ namespace _3d {
     class Tile {
         
         Shader shader;
-        static float size = 100.5f;
-
-        static float[] ys = {
-            new System.Random().Next(-1,1),
-            new System.Random().Next(-1,1),
-            new System.Random().Next(-1,1),
-            new System.Random().Next(-1,1),
-        };
-
-        float[] vertices = {
-//          X           Y   Z           R  G  B
-           -1.5f*size, ys[0],  1.5f*size,  1, 0, 0,
-            1.5f*size, ys[1],  1.5f*size,  1, 1, 0,
-            1.5f*size, ys[2], -1.5f*size,  1, 1, 1,
-           -1.5f*size, ys[3], -1.5f*size,  1, 0, 1,
-        };
-        uint[] indices = {
-            0, 1, 2,
-            0, 2, 3
-        };
-        int ibo, vbo, vao;
+        float[] vertices;
+        uint[] indices;
+        int ibo, vbo, vao;        
         Camera camera;
 
         public Tile(Camera camera, List<float> verts, List<uint> inds) {
-            
+
+            this.camera = camera;
             vertices = FloatListToFloatArray(verts);
             indices = UnsignedIntListToUintArray(inds);
-            this.camera = camera;
 
             shader = new Shader("Shaders/vertex.glsl", "Shaders/fragment.glsl");
             vbo = GL.GenBuffer();
@@ -83,17 +65,19 @@ namespace _3d {
 
             worldMatrix = Matrix4.Identity;
             viewMatrix = Matrix4.LookAt(camera.position, camera.position+camera.lookEye, camera.up);
-            projMatrix = Matrix4.CreatePerspectiveFieldOfView(MathHelper.DegreesToRadians(45), 1000/720, 0.01f, 2000f);
+            projMatrix = Matrix4.CreatePerspectiveFieldOfView(MathHelper.DegreesToRadians(80), 1000/720, 0.01f, 2000f);
 
             GL.UniformMatrix4(worldUniformLocation, false, ref worldMatrix);
             GL.UniformMatrix4(viewUniformLocation, false, ref viewMatrix);
             GL.UniformMatrix4(ProjectionUniformLocation, false, ref projMatrix);
+
+            camera.calculateMouse(projMatrix, this);
         }
 
         public void Render() {
 
             GL.Enable(EnableCap.DepthTest);
-            GL.ClearColor(0.0f,0.0f,0.0f,1.0f);
+            GL.ClearColor(0.05f,0.05f,0.05f,1.0f);
             GL.Clear(ClearBufferMask.DepthBufferBit | ClearBufferMask.ColorBufferBit);
             
             try {
@@ -109,15 +93,23 @@ namespace _3d {
 
                 worldMatrix = Matrix4.Identity;
                 viewMatrix = Matrix4.LookAt(camera.position, camera.position+camera.lookEye, camera.up);
-                projMatrix = Matrix4.CreatePerspectiveFieldOfView(MathHelper.DegreesToRadians(45), 1000/720, 0.01f, 2000f);
+                projMatrix = Matrix4.CreatePerspectiveFieldOfView(MathHelper.DegreesToRadians(95), 1000/720, 0.01f, 2000f);
 
                 GL.UniformMatrix4(worldUniformLocation, false, ref worldMatrix);
                 GL.UniformMatrix4(viewUniformLocation, false, ref viewMatrix);
                 GL.UniformMatrix4(ProjectionUniformLocation, false, ref projMatrix);
                 GL.BindVertexArray(vao);
-                GL.DrawElements(PrimitiveType.Lines, indices.Length, DrawElementsType.UnsignedInt, 0);
+                GL.DrawElements(PrimitiveType.Points, indices.Length, DrawElementsType.UnsignedInt, 0);
             }
             catch(System.Exception e) {System.Console.WriteLine(e.Message);}
+        }
+
+        public void ChangeTerrain(List<float> vertices, List<uint> indices) {
+            this.vertices = FloatListToFloatArray(vertices);
+            this.indices = UnsignedIntListToUintArray(indices);
+
+            GL.BufferData(BufferTarget.ArrayBuffer, this.vertices.Length * sizeof(float), this.vertices, BufferUsageHint.StaticDraw);
+            GL.BufferData(BufferTarget.ElementArrayBuffer, this.indices.Length * sizeof(uint), this.indices, BufferUsageHint.StaticDraw);
         }
 
         float[] FloatListToFloatArray(List<float> list) {
