@@ -3,8 +3,6 @@ namespace _3d
 {
     public class ImprovedNoise
     {
-        static double time = 1, move = 1, winter = 100, cloudsTime, cloudsMove;
-
         public static double noise(double x, double y, double z)
         {
             for (int i = 0; i < 256; i++) p[256 + i] = p[i] = permutation[i];
@@ -24,13 +22,13 @@ namespace _3d
                 B = p[x1 + 1] + y1, BA = p[B] + z1, BB = p[B + 1] + z1;      // THE 8 CUBE CORNERS,
 
             return lerp(z2, lerp(y2, lerp(x2, gradient(p[AA], x, y, z),
-                                             gradient(p[BA], x - 1, y, z)),
-                                    lerp(x2, gradient(p[AB], x, y - 1, z),
-                                             gradient(p[BB], x - 1, y - 1, z))),
-                           lerp(y2, lerp(x2, gradient(p[AA + 1], x, y, z - 1),
-                                             gradient(p[BA + 1], x - 1, y, z - 1)),
-                                    lerp(x2, gradient(p[AB + 1], x, y - 1, z - 1),
-                                             gradient(p[BB + 1], x - 1, y - 1, z - 1))));
+                                              gradient(p[BA], x - 1, y, z)),
+                                     lerp(x2, gradient(p[AB], x, y - 1, z),
+                                              gradient(p[BB], x - 1, y - 1, z))),
+                            lerp(y2, lerp(x2, gradient(p[AA + 1], x, y, z - 1),
+                                              gradient(p[BA + 1], x - 1, y, z - 1)),
+                                     lerp(x2, gradient(p[AB + 1], x, y - 1, z - 1),
+                                              gradient(p[BB + 1], x - 1, y - 1, z - 1))));
         }
         static double fade(double t)
         {

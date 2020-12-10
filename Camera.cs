@@ -1,6 +1,7 @@
 using OpenTK.Mathematics;
 using OpenTK.Windowing.Common;
 using OpenTK.Windowing.GraphicsLibraryFramework;
+using OpenTK.Graphics.OpenGL;
 
 using System;
 
@@ -8,15 +9,19 @@ namespace _3d {
 
     class Camera {
 
-        float speed = 2;
+        float speed = 5;
         float xRotation, yRotation;
         public Vector3 position = new Vector3(0,20,0),
                        lookEye = new Vector3(0,0, -1),
                        up = new Vector3(0,1,0);
 
-        Game game;
+        public Game game;
         Vector2 lastPosition;
+        public Vector2 mousePosition2D;
         bool canRotate = false;
+
+        Matrix4 projection;
+        Tile tile;
 
         public Camera(Game game) {
             this.game = game;
@@ -53,6 +58,14 @@ namespace _3d {
                 yRotation -= (lastPosition.X - e.X) * .5f;
             }
             lastPosition = new Vector2(e.X, e.Y);
+            
+            // converts mouse position to 2d screen position
+            mousePosition2D = new Vector2(((e.Position.X/game.ClientSize.X)*2-.5f)*2, 
+                                         -((e.Position.Y/game.ClientSize.Y)*2-.5f)*2);
+        }
+
+        public void GiveTerrain(Tile tile) {
+            this.tile = tile;
         }
 
         void MouseDown(MouseButtonEventArgs e) {
@@ -67,6 +80,11 @@ namespace _3d {
             if (value > max) value = max;
             if (value < min) value = min;
             return value;
+        }
+
+        public void calculateMouse(Matrix4 projection, Tile tile) {
+            this.projection = projection;
+            this.tile = tile;
         }
     }
 }

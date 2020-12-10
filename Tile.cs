@@ -99,12 +99,12 @@ namespace _3d {
                 GL.UniformMatrix4(viewUniformLocation, false, ref viewMatrix);
                 GL.UniformMatrix4(ProjectionUniformLocation, false, ref projMatrix);
                 GL.BindVertexArray(vao);
-                GL.DrawElements(PrimitiveType.Points, indices.Length, DrawElementsType.UnsignedInt, 0);
+                GL.DrawElements(PrimitiveType.Lines, indices.Length, DrawElementsType.UnsignedInt, 0);
             }
             catch(System.Exception e) {System.Console.WriteLine(e.Message);}
         }
 
-        public void ChangeTerrain(List<float> vertices, List<uint> indices) {
+        public void a(List<float> vertices, List<uint> indices) {
             this.vertices = FloatListToFloatArray(vertices);
             this.indices = UnsignedIntListToUintArray(indices);
 

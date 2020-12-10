@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using OpenTK.Windowing.Common;
 using OpenTK.Windowing.Desktop;
 using OpenTK.Mathematics;
@@ -33,47 +33,56 @@ namespace _3d
 
         List<float> vertices = new List<float>();
         List<uint> indices = new List<uint>();
-        int mapResolution = 400;
-        float[] colors = {1,1,1};
+        int mapResolution = 700;
+        float[] colors = {0,.5f,.7f};
         double seed = new Random().Next(1,100000000);
-
         int id = 0;
+        float tileSize = 20;
 
         public Game(GameWindowSettings gameWindowSettings, NativeWindowSettings nativeWindowSettings) : base(gameWindowSettings,nativeWindowSettings) {
             
+            int multiplier = 2;
+
             for (int x = -(mapResolution/2); x < mapResolution/2; x++) {
                 for (int y = -(mapResolution/2); y < mapResolution/2; y++) {
 
-                    vertices.Add(-.5f+x);
-                    vertices.Add( .5f+CreateNewNoiseLayer(15, 2, .5f, (-.5f+x)/mapResolution, (.5f+y)/mapResolution, (float)seed));
-                    vertices.Add( .5f+y);
+                    float[] ys = {
+                        200+CreateNewNoiseLayer(15, 2, .5f, (-.5f+x)/mapResolution, ( .5f+y)/mapResolution, (float)seed),
+                        200+CreateNewNoiseLayer(15, 2, .5f, ( .5f+x)/mapResolution, ( .5f+y)/mapResolution, (float)seed),
+                        200+CreateNewNoiseLayer(15, 2, .5f, ( .5f+x)/mapResolution, (-.5f+y)/mapResolution, (float)seed),
+                        200+CreateNewNoiseLayer(15, 2, .5f, (-.5f+x)/mapResolution, (-.5f+y)/mapResolution, (float)seed)
+                    };
+
+                    vertices.Add((-.5f+x)*tileSize);
+                    vertices.Add( .5f+ys[0]);
+                    vertices.Add(( .5f+y)*tileSize);
 
                     vertices.Add(colors[0]);
-                    vertices.Add(colors[1]);
+                    vertices.Add(.5f+ys[0]*multiplier/2000);
                     vertices.Add(colors[2]);
 
-                    vertices.Add( .5f+x);
-                    vertices.Add( .5f+CreateNewNoiseLayer(15, 2, .5f, (.5f+x)/mapResolution, (.5f+y)/mapResolution, (float)seed));
-                    vertices.Add( .5f+y);
+                    vertices.Add(( .5f+x)*tileSize);
+                    vertices.Add( .5f+ys[1]);
+                    vertices.Add(( .5f+y)*tileSize);
 
                     vertices.Add(colors[0]);
-                    vertices.Add(colors[1]);
+                    vertices.Add(.5f+ys[1]*multiplier/2000);
                     vertices.Add(colors[2]);
 
-                    vertices.Add( .5f+x);
-                    vertices.Add( .5f+CreateNewNoiseLayer(15, 2, .5f, (.5f+x)/mapResolution, (-.5f+y)/mapResolution, (float)seed));
-                    vertices.Add(-.5f+y);
+                    vertices.Add(( .5f+x)*tileSize);
+                    vertices.Add( .5f+ys[2]);
+                    vertices.Add((-.5f+y)*tileSize);
 
                     vertices.Add(colors[0]);
-                    vertices.Add(colors[1]);
+                    vertices.Add(.5f+ys[2]*multiplier/2000);
                     vertices.Add(colors[2]);
 
-                    vertices.Add(-.5f+x);
-                    vertices.Add( .5f+CreateNewNoiseLayer(15, 2, .5f, (-.5f+x)/mapResolution, (-.5f+y)/mapResolution, (float)seed));
-                    vertices.Add(-.5f+y);
+                    vertices.Add((-.5f+x)*tileSize);
+                    vertices.Add( .5f+ys[3]);
+                    vertices.Add((-.5f+y)*tileSize);
 
                     vertices.Add(colors[0]);
-                    vertices.Add(colors[1]);
+                    vertices.Add(.5f+ys[3]*multiplier/2000);
                     vertices.Add(colors[2]);
 
                     indices.Add((uint)id*4);
@@ -91,8 +100,8 @@ namespace _3d
 
         float CreateNewNoiseLayer(int octaves, float lac, float per, float x, float y, float seed) {
 
-            float frequency = 2,
-                  amplitude = 49;
+            float frequency = 3f,
+                  amplitude = 1009;
 
             float noise = 0;
 
