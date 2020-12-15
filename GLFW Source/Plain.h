@@ -10,6 +10,7 @@
 
 #include "libs.h"
 #include "Shader.h"
+#include "noise.h"
 
 #include <iostream>
 #include <glm/gtc/noise.hpp>
@@ -46,6 +47,7 @@ int mapSize = 10;
 float size = 1.5f;
 int indicies_array_size;
 
+
 class Plain {
 private:
     GLuint ibo, vbo, vao;
@@ -53,7 +55,23 @@ private:
     float vertices[120*120*24] = {};
 
     unsigned int indices[120*120*6] = {};
-
+    
+    
+    
+    float createNoiseLayer(int o, float l, float p, float x, float y, float seed) {
+        
+        float freq = 2,
+        ampl = 10;
+        
+        float noise = 0;
+        
+        for (int i = 0; i < o; i++) {
+            noise += perlin_noise().noise(x*freq, y*freq, seed)*ampl;
+            freq *= l;
+            ampl *= p;
+        }
+        return noise;
+    }
     
 public:
     Shader shader = Shader(vertexShaderSource, fragmentShaderSource);
@@ -61,47 +79,43 @@ public:
     void set_vertices(int resolution) {
         int _id = 0;
         
-        float freq = 2, ampl = 10;
-        
+        int seed = (int)random() % 1000;
+        cout << seed;
                 
-        for (int x = -resolution/2; x < resolution/2; x++) {
-            for (int z = -resolution/2; z < resolution/2; z++) {
+        for (int x = 0; x < resolution; x++) {
+            for (int z = 0; z < resolution; z++) {
                 
                 vertices[_id*24] = x;
-                vertices[_id*24+1] = simplex(vec3((float)x/resolution*freq,
-                                                  (float)z/resolution*freq, 100))*ampl;
+                vertices[_id*24+1] = createNoiseLayer(55, 2.f, .5f, (float)x/resolution, (float)z/resolution, seed);
                 vertices[_id*24+2] = z;
                 
-                vertices[_id*24+3] = 1;
-                vertices[_id*24+4] = 1;
-                vertices[_id*24+5] = 1;
+                vertices[_id*24+3] = (float)x/resolution + (float)z/resolution;
+                vertices[_id*24+4] = 0;
+                vertices[_id*24+5] = 1-(float)x/resolution + (float)z/resolution;
                 
                 vertices[_id*24+6] = x;
-                vertices[_id*24+7] = simplex(vec3((float)x/resolution*freq,
-                                                  (float)(z+1)/resolution*freq, 100))*ampl;
+                vertices[_id*24+7] = createNoiseLayer(55, 2.f, .5f, (float)x/resolution, (float)(z+1)/resolution, seed);
                 vertices[_id*24+8] = z+1;
                 
-                vertices[_id*24+9] = 1;
-                vertices[_id*24+10] = 1;
-                vertices[_id*24+11] = 1;
+                vertices[_id*24+9] =  (float)x/resolution + (float)(z+1)/resolution;
+                vertices[_id*24+10] = 0;
+                vertices[_id*24+11] = 1-(float)x/resolution + (float)(z+1)/resolution;
                 
                 vertices[_id*24+12] = x+1;
-                vertices[_id*24+13] = simplex(vec3((float)(x+1)/resolution*freq,
-                                                   (float)(z+1)/resolution*freq, 100))*ampl;
+                vertices[_id*24+13] = createNoiseLayer(55, 2.f, .5f, (float)(x+1)/resolution, (float)(z+1)/resolution, seed);
                 vertices[_id*24+14] = z+1;
                 
-                vertices[_id*24+15] = 1;
-                vertices[_id*24+16] = 1;
-                vertices[_id*24+17] = 1;
+                vertices[_id*24+15] = (float)(x+1)/resolution + (float)(z+1)/resolution;
+                vertices[_id*24+16] = 0;
+                vertices[_id*24+17] = 1-(float)(x+1)/resolution + (float)(z+1)/resolution;
                 
                 vertices[_id*24+18] = x+1;
-                vertices[_id*24+19] = simplex(vec3((float)(x+1)/resolution*freq,
-                                                   (float)z/resolution*freq, 100))*ampl;
+                vertices[_id*24+19] = createNoiseLayer(55, 2.f, .5f, (float)(x+1)/resolution, (float)z/resolution, seed);
                 vertices[_id*24+20] = z;
                 
-                vertices[_id*24+21] = 1;
-                vertices[_id*24+22] = 1;
-                vertices[_id*24+23] = 1;
+                vertices[_id*24+21] = (float)(x+1)/resolution + (float)z/resolution;
+                vertices[_id*24+22] = 0;
+                vertices[_id*24+23] = 1-(float)(x+1)/resolution + (float)z/resolution;
                 
                 
                 indices[_id*6] =   _id*4;
@@ -198,7 +212,7 @@ public:
         shader.set_mat4(projectionUniformLocation, projection);
         
         glBindVertexArray(vao);
-        glDrawElements(GL_POINTS, indicies_array_size, GL_UNSIGNED_INT, 0);
+        glDrawElements(GL_LINES, indicies_array_size, GL_UNSIGNED_INT, 0);
     }
 };
 
