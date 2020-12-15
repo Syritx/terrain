@@ -61,7 +61,7 @@ private:
     float createNoiseLayer(int o, float l, float p, float x, float y, float seed) {
         
         float freq = 2,
-        ampl = 10;
+        ampl = 20;
         
         float noise = 0;
         
@@ -77,54 +77,40 @@ public:
     Shader shader = Shader(vertexShaderSource, fragmentShaderSource);
     
     void set_vertices(int resolution) {
-        int _id = 0;
+        int _id = 0, vertexId = 0;
         
-        int seed = (int)random() % 1000;
+        int seed = (int)random() % 100000;
         cout << seed;
+        
+        float xzOffset[] = {
+            0, 0,
+            0, 1,
+            1, 1,
+            1, 0
+        }, indicesOffsets[] = {
+            0, 1, 2,
+            0, 2, 3
+        };
                 
         for (int x = 0; x < resolution; x++) {
             for (int z = 0; z < resolution; z++) {
                 
-                vertices[_id*24] = x;
-                vertices[_id*24+1] = createNoiseLayer(55, 2.f, .5f, (float)x/resolution, (float)z/resolution, seed);
-                vertices[_id*24+2] = z;
+                for (int i = 0; i < 4; i++) {
+                    vertices[vertexId*6  ] = x+xzOffset[i*2];
+                    vertices[vertexId*6+1] = createNoiseLayer(55, 2.f, .5f, (float)(x+xzOffset[i*2])/resolution,
+                                                                            (float)(z+xzOffset[i*2+1])/resolution, seed);
+                    vertices[vertexId*6+2] = z+xzOffset[i*2+1];
+                    
+                    vertices[vertexId*6+3] = (float)x/resolution + (float)z/resolution;
+                    vertices[vertexId*6+4] = 0;
+                    vertices[vertexId*6+5] = 1-(float)x/resolution + (float)z/resolution;
+                    
+                    vertexId++;
+                }
                 
-                vertices[_id*24+3] = (float)x/resolution + (float)z/resolution;
-                vertices[_id*24+4] = 0;
-                vertices[_id*24+5] = 1-(float)x/resolution + (float)z/resolution;
-                
-                vertices[_id*24+6] = x;
-                vertices[_id*24+7] = createNoiseLayer(55, 2.f, .5f, (float)x/resolution, (float)(z+1)/resolution, seed);
-                vertices[_id*24+8] = z+1;
-                
-                vertices[_id*24+9] =  (float)x/resolution + (float)(z+1)/resolution;
-                vertices[_id*24+10] = 0;
-                vertices[_id*24+11] = 1-(float)x/resolution + (float)(z+1)/resolution;
-                
-                vertices[_id*24+12] = x+1;
-                vertices[_id*24+13] = createNoiseLayer(55, 2.f, .5f, (float)(x+1)/resolution, (float)(z+1)/resolution, seed);
-                vertices[_id*24+14] = z+1;
-                
-                vertices[_id*24+15] = (float)(x+1)/resolution + (float)(z+1)/resolution;
-                vertices[_id*24+16] = 0;
-                vertices[_id*24+17] = 1-(float)(x+1)/resolution + (float)(z+1)/resolution;
-                
-                vertices[_id*24+18] = x+1;
-                vertices[_id*24+19] = createNoiseLayer(55, 2.f, .5f, (float)(x+1)/resolution, (float)z/resolution, seed);
-                vertices[_id*24+20] = z;
-                
-                vertices[_id*24+21] = (float)(x+1)/resolution + (float)z/resolution;
-                vertices[_id*24+22] = 0;
-                vertices[_id*24+23] = 1-(float)(x+1)/resolution + (float)z/resolution;
-                
-                
-                indices[_id*6] =   _id*4;
-                indices[_id*6+1] = _id*4+1;
-                indices[_id*6+2] = _id*4+2;
-                indices[_id*6+3] = _id*4;
-                indices[_id*6+4] = _id*4+2;
-                indices[_id*6+5] = _id*4+3;
-                
+                for (int i = 0; i < 6; i++) {
+                    indices[_id*6+i] =   _id*4+indicesOffsets[i];
+                }
                 _id++;
             }
         }
